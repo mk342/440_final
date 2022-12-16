@@ -1,0 +1,163 @@
+---
+title: "Independent Project: "
+author: "Minwoo Kang"
+date: "December 17, 2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r knit-settings, include=FALSE, echo=FALSE, warning=FALSE}
+# Prevent code from showing up in final report
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r random-seed, echo=FALSE, warning=FALSE}
+set.seed(440)
+```
+
+```{r libraries, include=FALSE, echo=FALSE, warning=FALSE}
+library(tidyverse)
+library(eha)
+library(survival)
+library(survminer)
+library(knitr)
+library(broom)
+library(kableExtra)
+library(dplyr)
+library(sjmisc)
+library(stringr)
+```
+
+# 1. Introduction
+
+## 1.1 Background Information on Current Hip-Hop Music Industry
+
+## 1.2 Dataset Used
+
+## 1.3 Variables of Interest
+
+```{r preprocessing}
+# Only include patients enrolled in the follow up protocol
+data <- rawdata %>% 
+  filter(FUPROTCL == 1)
+  
+# Keep only the first catheterization per patient
+data <- data %>% 
+  group_by(RSUBJID) %>%
+  mutate(NUMCATHS = max(RSEQCATHNUM)) %>%
+  filter(RSEQCATHNUM == 1) %>% 
+  ungroup()
+```
+
+```{r}
+billboard <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-14/billboard.csv')
+audio_features <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-14/audio_features.csv')
+```
+```{r preprocessing}
+# Only include patients enrolled in the follow up protocol
+data <- rawdata %>% 
+  filter(FUPROTCL == 1)
+  
+# Keep only the first catheterization per patient
+data <- data %>% 
+  group_by(RSUBJID) %>%
+  mutate(NUMCATHS = max(RSEQCATHNUM)) %>%
+  filter(RSEQCATHNUM == 1) %>% 
+  ungroup()
+```
+
+```{r}
+spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+```
+
+```{r}
+billboard_cleaned <- billboard %>%
+  group_by(song_id) %>%
+  arrange(weeks_on_chart) %>%
+  slice(n()) %>%
+  ungroup() %>%
+  select(song_id, peak_position, weeks_on_chart)
+
+audio_features_cleaned <- audio_features %>%
+  select(-spotify_track_preview_url, -spotify_track_album)
+
+billboard_cleaned
+```
+
+```{r}
+audio_features_cleaned <- audio_features %>%
+  select(-spotify_track_preview_url, -spotify_track_album)
+
+audio_features_cleaned
+```
+
+```{r}
+all_data <- merge(x=billboard_cleaned, y=audio_features_cleaned, by="song_id")
+
+all_data
+```
+
+```{r}
+all_data_hiphop <- all_data %>%
+  filter(grepl("hip hop", spotify_genre) == TRUE)
+
+all_data_hiphop
+```
+Let's use this for now
+```{r}
+spotify_songs_hiphop <- spotify_songs %>%
+  filter(playlist_genre == "rap")
+
+spotify_songs_hiphop
+```
+```{r}
+spotify_songs
+```
+
+```{r}
+spotify_songs <- drop_na(spotify_songs) %>%
+  filter(track_popularity > 0)
+spotify_songs
+```
+
+# 2. Exploratory Data Analysis (EDA)
+
+track_popularity ~ playlist_genre, danceability, energy, key, loudness, mode, speechiness, acousticness, instrumentalness, liveness, valence, tempo, duration_ms
+
+```{r}
+# Figure for popularity
+
+ggplot(spotify_songs, aes(x = track_popularity)) +
+  geom_histogram(colour = 4, fill = "white", bins = 10) +
+  labs(x = "Track Popularity",
+       y = "Number of Tracks") +
+  theme_minimal() +
+  theme(axis.title = element_text(size = 8),
+        title = element_text(size = 8),
+        axis.text = element_text(size = 8))
+```
+
+# 3. Methodology
+
+## 3.1 Description of Methodology
+
+## 3.2 Model Specification
+
+## 3.3 Model Assumptions
+
+Missing data?
+
+# 4. Result
+
+# 5. Discussion
+
+## 5.1 Conclusion
+
+## 5.2 Potential Limitations and Future Directions
+
+## 5.3 Summary
+
+# Appendix A
+
